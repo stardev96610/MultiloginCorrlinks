@@ -142,7 +142,6 @@ let server = app.listen(8000, function() {
                 }
             } else {
                 try {
-                    console.log(accountList[i].inmate_number, ": Cookies Exist");
                     let cookies = Constants.getCookies().find(item => item.inmate_number == accountList[i].inmate_number).cookies;
                     await page.setCookie(...cookies);
                     await page.goto('https://www.corrlinks.com/Default.aspx', { timeout: 30000 }); // Open unreadMessageList page
@@ -154,8 +153,9 @@ let server = app.listen(8000, function() {
                         cookies,
                         time
                     });
-
                     await browser.close();
+                    console.log(accountList[i].inmate_number, ": Cookies OK");
+                    await timeout(5000);
                 } catch (error) {
                     console.log(error);
                     await browser.close();
