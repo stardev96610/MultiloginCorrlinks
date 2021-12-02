@@ -64,7 +64,7 @@ async function saveSMS(cookies) {
                     cookiesArr.filter((item, index) => index >= min && index < max).map(async item => {
                         return new Promise(async resolve => {
                             const browser = await puppeteer.launch({
-                                headless: false,
+                                headless: true,
                             });
 
                             const page = await browser.newPage();
