@@ -25,7 +25,7 @@ app.get('/', function(req, res) {
     res.send('Hello');
 });
 
-app.get('/webhook', function(req, res) {
+app.get('/multiwebhook', function(req, res) {
     let data = req.query.Body.replace(/"/g, '\\"');
     if (req.query.From && req.query.To && req.query.Body) {
         db.query(`INSERT INTO replies (sender, recipient, content) VALUES ("${req.query.From.slice(1)}", "${req.query.To.slice(1)}", "${data}")`, (error, item) => {
