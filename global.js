@@ -129,6 +129,7 @@ let server = app.listen(8000, function() {
                     // Get cookies
                     let cookies = await page.cookies();
                     let time = new Date();
+                    console.log(accountList[i].inmate_number, ': Get Cookie is OK');
                     Constants.addCookies({
                         inmate_number: accountList[i].inmate_number,
                         cookies,
@@ -153,7 +154,6 @@ let server = app.listen(8000, function() {
                         time
                     });
                     await browser.close();
-                    console.log(accountList[i].inmate_number, ": Cookies OK");
                     await timeout(5000);
                 } catch (error) {
                     console.log(error);
