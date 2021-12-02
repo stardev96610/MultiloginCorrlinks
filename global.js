@@ -86,6 +86,15 @@ let server = app.listen(8000, function() {
             });
             const browser = await puppeteer.launch({
                 headless: true,
+                devtools: false,
+                args: [
+                    '--disable-gpu',
+                    '--disable-dev-shm-usage',
+                    '--no-sandbox',
+                    '--disable-setuid-sandbox',
+                    '--ignore-certificate-errors',
+                    '--ignore-certificate-errors-spki-list'
+                ]
             });
             const page = await browser.newPage();
             if (!Constants.isCookieExist(accountList[i].inmate_number)) {
