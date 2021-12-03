@@ -41,6 +41,10 @@ async function monitorReplyMessages() {
                     }
                 });
             } else {
+
+                db.query(`UPDATE replies SET unread=1 WHERE unread=2`, (error, user) => {
+
+                });
                 // console.log('no reply messgage');
             }
         });

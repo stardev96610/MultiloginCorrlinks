@@ -137,6 +137,9 @@ async function saveSMS(cookies) {
                                     }
                                 }
                             } catch (error) {
+                                db.query(`UPDATE sms SET unread=1 WHERE unread=2`, (error, user) => {
+
+                                });
                                 // console.log('no unread message in inBox');
                             }
                             await browser.close();
