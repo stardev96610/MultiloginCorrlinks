@@ -50,34 +50,14 @@ let server = app.listen(8000, function() {
             monitor: true
         });
 
-        // sendSMS.on('message', async msg => {
-        //     if (msg.unread) {
-        //         console.log('sendSMS is restarted with new cookies');
-        //         sendSMS.send({
-        //             start: true,
-        //             cookies: cookies
-        //         })
-        //     }
-        // });
-
         const replySMS = fork(path.join(__dirname, 'replySMS'));
         replySMS.send({
             start: true,
         });
 
-        // replySMS.on('message', async msg => {
-        //     if (msg.replyError) {
-        //         console.log('reply Error');
-        //         replySMS.send({
-        //             start: true,
-        //             cookies: cookies
-        //         })
-        //     }
-        // });
-
-        let accountList = await Accounts.getAccounts();
 
         for (let i = 0;;) {
+            let accountList = await Accounts.getAccounts();
             sendSMS.send({
                 cookiesList: Constants.getCookies()
             });
