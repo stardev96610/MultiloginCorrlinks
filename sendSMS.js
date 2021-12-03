@@ -106,8 +106,11 @@ async function saveSMS(cookies) {
                                 console.log("First Line content: ", phoneNumber);
                                 console.log("-----------------------------------------")
                                 if (keywordList.includes(phoneNumber.toLowerCase())) {
+
                                     let keyword = phoneNumber.toLowerCase();
                                     let fromInmateNumber = fromInmateNumber;
+                                    console.log('keyword:', keyword)
+                                    console.log('fromInmateNumber:', fromInmateNumber)
                                     db.query(`SELECT content from keywords where keyword="${phoneNumber.toLowerCase()}"`, (error, content) => {
                                         if (content.length) {
                                             db.query(`INSERT INTO replies (sender, recipient, content, unread) VALUES ("${keyword}", "${fromInmateNumber}", "${content[0].content.replace(/"/g, '\\"')}", 1)`, (error, item) => {
