@@ -69,7 +69,7 @@ async function replySMS(cookies, row, inmateNumber, senderPhoneNumber) {
         await page.setCookie(...cookies);
 
         await page.goto('https://www.corrlinks.com/NewMessage.aspx'); // Opens page as logged user
-
+        await page.screenshot({ path: 'newMessage.png' });
         console.log('reply started')
         var table;
         do {
@@ -78,7 +78,6 @@ async function replySMS(cookies, row, inmateNumber, senderPhoneNumber) {
             table = await page.$$('#ctl00_mainContentPlaceHolder_addressBox_addressGrid');
         } while (table.length == 0);
         const address = await page.$x(`//th[contains(text(), "${inmateNumber}")]`);
-        await page.screenshot({ path: 'NewMessage.png' });
         const tr = (await address[0].$x('..'))[0];
         const checkBox = await tr.$$('td > div > span > input');
         await checkBox[0].click();
