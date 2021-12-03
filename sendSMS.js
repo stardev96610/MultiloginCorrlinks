@@ -137,7 +137,7 @@ async function saveSMS(cookies) {
                                     }
                                 }
                             } catch (error) {
-                                console.log('no unread message in inBox');
+                                // console.log('no unread message in inBox');
                             }
                             await browser.close();
                             resolve();
