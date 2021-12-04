@@ -20,7 +20,7 @@ process.on('message', msg => {
 });
 let interval;
 async function monitorReplyMessages() {
-    interval = setInterval(() => {
+    interval = setInterval(async() => {
         let keywordList = await Keyword.getKeys();
         db.query(`SELECT * FROM replies WHERE unread=1 LIMIT 1`, (error, row) => {
             console.log(row);
