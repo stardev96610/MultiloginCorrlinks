@@ -18,10 +18,11 @@ process.on('message', msg => {
     if (msg.cookiesList)
         cookiesArr = msg.cookiesList;
 });
+let interval;
 async function monitorReplyMessages() {
     let keywordList = await Keyword.getKeys();
     console.log(keywordList);
-    setInterval(() => {
+    interval = setInterval(() => {
         db.query(`SELECT * FROM replies WHERE unread=1 LIMIT 1`, (error, row) => {
             console.log(row);
             if (row.length) {
@@ -42,10 +43,10 @@ async function monitorReplyMessages() {
                     }
                 });
             } else {
-                // console.log('aaa');
-                // db.query(`UPDATE replies SET unread=1 WHERE unread=2`, (error, user) => {
 
-                // });
+                db.query(`UPDATE replies SET unread=1 WHERE unread=2`, (error, user) => {
+
+                });
                 // console.log('no reply messgage');
             }
         });
@@ -116,8 +117,8 @@ async function replySMS(cookies, row, inmateNumber, senderPhoneNumber) {
         console.log(new Date());
         console.log(cookies);
         console.log(error);
-        // clearInterval(interval);
-        // monitorReplyMessages();
+        clearInterval(interval);
+        monitorReplyMessages();
         // process.send({
         //     replyError: true
         // });
