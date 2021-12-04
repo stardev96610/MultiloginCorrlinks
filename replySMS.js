@@ -18,10 +18,11 @@ process.on('message', msg => {
     if (msg.cookiesList)
         cookiesArr = msg.cookiesList;
 });
-let interval;
 async function monitorReplyMessages() {
-    interval = setInterval(async() => {
-        let keywordList = await Keyword.getKeys();
+    let keywordList = await Keyword.getKeys();
+    console.log(keywordList);
+    timeout(3000);
+    setInterval(() => {
         db.query(`SELECT * FROM replies WHERE unread=1 LIMIT 1`, (error, row) => {
             console.log(row);
             if (row.length) {
@@ -125,4 +126,16 @@ async function replySMS(cookies, row, inmateNumber, senderPhoneNumber) {
 
     try { await browser.close() } catch (error) {}
     console.log("the reply Browser is closed");
+}
+
+async function timeout(ms, logTimer) {
+    if (logTimer) console.log(`Tempo: ${ms / 1000}`)
+    async function timer(time, logTimer) {
+        if (time >= 0) {
+            if (logTimer) console.log(`Aguardando: ${time}`)
+            await new Promise(resolve => setTimeout(resolve, 1000))
+            return await timer(--time, logTimer)
+        }
+    }
+    await timer(ms / 1000, logTimer)
 }
