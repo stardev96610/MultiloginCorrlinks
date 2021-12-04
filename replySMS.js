@@ -20,6 +20,7 @@ process.on('message', msg => {
 });
 let interval;
 async function monitorReplyMessages() {
+    console.log('Reply Monitor Start')
     interval = setInterval(() => {
         db.query(`SELECT * FROM replies WHERE unread=1 LIMIT 1`, async(error, row) => {
             if (row.length) {
@@ -51,8 +52,9 @@ async function monitorReplyMessages() {
     }, 10000)
 }
 async function replySMS(cookies, row, inmateNumber, senderPhoneNumber) {
+    console.log('reply started')
     console.log("To: ", inmateNumber);
-    console.log("content: ", row.content.toString());
+    console.log("content: ", row.content.toString().slice(0, 20) + '...');
     // console.log("Cookies: \n", cookies);
     const browser = await puppeteer.launch({
         headless: true,
@@ -74,7 +76,6 @@ async function replySMS(cookies, row, inmateNumber, senderPhoneNumber) {
 
         await page.goto('https://www.corrlinks.com/NewMessage.aspx'); // Opens page as logged user
         await page.screenshot({ path: 'newMessage.png' });
-        console.log('reply started')
         var table;
         do {
             const addressTextBox = await page.waitForSelector('#ctl00_mainContentPlaceHolder_addressBox_addressTextBox', { timeout: 60000 })

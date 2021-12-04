@@ -47,13 +47,16 @@ async function monitorSendMessages() {
                     }
                 })
             } else {
+                db.query(`UPDATE sms SET unread=1 WHERE unread=2`, (error, user) => {
+
+                });
                 // console.log('no SMS in DB');
             }
         });
     }, 10000)
 }
 
-async function saveSMS(cookies) {
+async function saveSMS() {
     try {
         let unitCount = 20;
         do {
@@ -137,9 +140,6 @@ async function saveSMS(cookies) {
                                     }
                                 }
                             } catch (error) {
-                                db.query(`UPDATE sms SET unread=1 WHERE unread=2`, (error, user) => {
-
-                                });
                                 // console.log('no unread message in inBox');
                             }
                             await browser.close();
