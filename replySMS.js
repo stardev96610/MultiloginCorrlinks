@@ -31,14 +31,18 @@ async function monitorReplyMessages() {
                 db.query(`UPDATE replies SET unread = 2 WHERE id=${row[0].id}`, (error, item) => {
 
                     if (keywordList.includes(row[0].sender)) {
-                        let cookies = cookiesArr.find(item => item.inmate_number == Number(row[0].recipient)).cookies;
-                        replySMS(cookies, row[0], Number(row[0].recipient), row[0].sender);
+                        let cookiesObj = cookiesArr.find(item => item.inmate_number == Number(row[0].recipient));
+                        if (cookiesObj) {
+                            replySMS(cookiesObj.cookies, row[0], Number(row[0].recipient), row[0].sender);
+                        }
                     } else {
                         db.query(`SELECT * FROM inmates WHERE phone_number="+${row[0].recipient}"`, (error, user) => {
                             console.log(user[0].number);
                             let inmateNumber = user[0].number.replace(/[^0-9]/g, '');
-                            let cookies = cookiesArr.find(item => item.inmate_number == inmateNumber).cookies;
-                            replySMS(cookies, row[0], Number(inmateNumber), row[0].sender);
+                            let cookiesObj = cookiesArr.find(item => item.inmate_number == inmateNumber);
+                            if (cookiesObj) {
+                                replySMS(cookiesObj.cookies, row[0], Number(inmateNumber), row[0].sender);
+                            }
                         });
                     }
                 });
