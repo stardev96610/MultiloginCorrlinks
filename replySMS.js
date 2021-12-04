@@ -21,8 +21,8 @@ process.on('message', msg => {
 let interval;
 async function monitorReplyMessages() {
     interval = setInterval(() => {
-        console.log('Reply Monitor Start')
         db.query(`SELECT * FROM replies WHERE unread=1 LIMIT 1`, async(error, row) => {
+            console.log('Select Reply');
             if (row.length) {
                 console.log("sender: ", row[0].sender);
                 console.log("recipient: ", row[0].recipient);
