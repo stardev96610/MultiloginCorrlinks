@@ -36,6 +36,7 @@ async function monitorReplyMessages() {
                             console.log(user[0].number.length);
                             let inmateNumber = user[0].number.replace(/[^0-9]/g, '');
                             let cookies = cookiesArr.find(item => item.inmate_number == inmateNumber).cookies;
+                            if (!cookies) console.log('Cookie Error');
                             replySMS(cookies, row[0], Number(inmateNumber), row[0].sender);
                         });
                     }
