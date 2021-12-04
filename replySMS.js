@@ -21,7 +21,6 @@ process.on('message', msg => {
 async function monitorReplyMessages() {
     let keywordList = await Keyword.getKeys();
     console.log(keywordList);
-    timeout(3000);
     setInterval(() => {
         db.query(`SELECT * FROM replies WHERE unread=1 LIMIT 1`, (error, row) => {
             console.log(row);
@@ -43,10 +42,10 @@ async function monitorReplyMessages() {
                     }
                 });
             } else {
+                // console.log('aaa');
+                // db.query(`UPDATE replies SET unread=1 WHERE unread=2`, (error, user) => {
 
-                db.query(`UPDATE replies SET unread=1 WHERE unread=2`, (error, user) => {
-
-                });
+                // });
                 // console.log('no reply messgage');
             }
         });
