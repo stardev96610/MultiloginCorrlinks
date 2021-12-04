@@ -66,6 +66,8 @@ async function saveSMS() {
                 await Promise.all(
                     cookiesArr.filter((item, index) => index >= min && index < max).map(async item => {
                         return new Promise(async resolve => {
+                            let keywordList = await Keyword.getKeys();
+
                             const browser = await puppeteer.launch({
                                 headless: true,
                                 devtools: false,
@@ -104,19 +106,19 @@ async function saveSMS() {
                                 fs.writeFileSync('message.json', messageData);
                                 let data = JSON.parse(messageData).message;
                                 let phoneNumber = data.slice(0, data.indexOf('\n'));
-                                let keywordList = await Keyword.getKeys();
                                 await timeout(3000);
                                 console.log("First Line content: ", phoneNumber);
                                 console.log("-----------------------------------------")
-                                if (keywordList.includes(phoneNumber.toLowerCase())) {
+                                console.log(keywordList.slice());
+                                if (keywordList.find(item => item == phoneNumber.toLowerCase())) {
 
                                     let keyword = phoneNumber.toLowerCase();
-                                    let fromInmateNumber = fromInmateNumber;
+                                    let inmateNumber = fromInmateNumber;
                                     console.log('keyword:', keyword)
                                     console.log('fromInmateNumber:', fromInmateNumber)
                                     db.query(`SELECT content from keywords where keyword="${phoneNumber.toLowerCase()}"`, (error, content) => {
                                         if (content.length) {
-                                            db.query(`INSERT INTO replies (sender, recipient, content, unread) VALUES ("${keyword}", "${fromInmateNumber}", "${content[0].content.replace(/"/g, '\\"')}", 1)`, (error, item) => {
+                                            db.query(`INSERT INTO replies (sender, recipient, content, unread) VALUES ("${keyword}", "${inmateNumber}", "${content[0].content.replace(/"/g, '\\"')}", 1)`, (error, item) => {
                                                 console.log(item.insertId, "Keyword reply message saved correctly");
                                             });
                                         }
@@ -132,7 +134,7 @@ async function saveSMS() {
                                     else
                                         recipient = '';
                                     console.log("recipient:", recipient);
-                                    if (fromInmateNumber && recipient && content) {
+                                    if (fromInmateNumber && recipient) {
                                         db.query(`INSERT INTO sms (sender, recipient, content) VALUES ("${fromInmateNumber}", "${recipient}", "${content}")`, (error, item) => {
                                             if (error) console.log(error);
                                             console.log(item.insertId, " : SMS is recorded successfully in db");
