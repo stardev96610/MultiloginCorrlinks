@@ -113,6 +113,9 @@ async function replySMS(cookies, row, inmateNumber, senderPhoneNumber) {
         await sendMessageBtn.click();
         await page.screenshot({ path: 'send.png' });
         db.query(`DELETE FROM replies WHERE id=${row.id}`, (error, item) => {
+            db.query(`UPDATE inmates SET receive_count = receive_count+1 WHERE number=${inmateNumber}`, (error, count) => {
+                if (error) console.log(error);
+            });
             console.log('the message was replied correctly');
         });
     } catch (error) {
