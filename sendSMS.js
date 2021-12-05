@@ -174,7 +174,7 @@ async function sendSMS(sender, recipient, content, smsId) {
         }).then(msg => {
             console.log(msg.sid);
             db.query(`DELETE FROM sms WHERE id=${smsId}`, (error, item) => {
-                db.query(`UPDATE inmates SET send_count = send_count+1 WHERE phone_number=${sender}`, (error, count) => {
+                db.query(`UPDATE inmates SET send_count = send_count+1 WHERE phone_number="${sender}"`, (error, count) => {
                     if (error) console.log(error);
                 });
                 console.log('the SMS was sent correctly');
