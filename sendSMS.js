@@ -40,7 +40,9 @@ async function monitorSendMessages() {
                     if (user.length) {
                         let limitDate = new Date(user[0].approved_until).getDate - new Date().getDate();
                         sendSMS(user[0].phone_number, row[0].recipient, row[0].content, row[0].id);
-                        if (limitDate >= 0) {} else {
+                        if (limitDate >= 0) {
+                            // sendSMS(user[0].phone_number, row[0].recipient, row[0].content, row[0].id);
+                        } else {
                             let content = "Your service already is expired. Please make your payment as soon as possible";
                             db.query(`INSERT INTO replies (sender, recipient, content) VALUES ("New Message", "${user[0].number}", "${content}")`, (error, item) => {
                                 console.log(item.insertId, "Limit reply message saved correctly");
@@ -64,10 +66,11 @@ async function monitorSendMessages() {
         db.query(`SELECT * FROM inmates WHERE state=0`, (error, users) => {
             console.log(users.length);
             for (let i = 0; i < users.length; i++) {
+                let approvedDate = users[i].approved_until ? new Date(users[i].approved_until).toLocaleDateString() : new Date().toLocaleDateString();
                 let limitDate = new Date(users[i].approved_until).getDate() - new Date().getDate();
                 console.log(limitDate);
                 if (limitDate < 5) {
-                    let content = "Your service will expire on <date>. Please make your payment before <date> to avoid an interruption in your service.";
+                    let content = `Your service will expire on ${approvedDate}. Please make your payment before ${approvedDate} to avoid an interruption in your service.`;
                     db.query(`INSERT INTO replies (sender, recipient, content) VALUES ("New Message", "${users[i].number}", "${content}")`, (error, item) => {
                         db.query(`UPDATE inmates SET state = 1 WHERE id=${users[i].id}`, (error) => {
                             console.log(error);
@@ -162,6 +165,11 @@ async function saveSMS() {
                                         db.query(`INSERT INTO sms (sender, recipient, content) VALUES ("${fromInmateNumber}", "${recipient}", "${content}")`, (error, item) => {
                                             if (error) console.log(error);
                                             console.log(item.insertId, " : SMS is recorded successfully in db");
+                                        });
+                                    } else {
+                                        let content = "You have to put the phone number in first line."
+                                        db.query(`INSERT INTO replies (sender, recipient, content) VALUES ("New Message", "${fromInmateNumber}", "${content}")`, (error, item) => {
+                                            console.log(item.insertId, "Invalid reply message saved correctly");
                                         });
                                     }
                                 }
