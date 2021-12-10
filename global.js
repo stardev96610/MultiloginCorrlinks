@@ -3,7 +3,6 @@ const { fork } = require('child_process')
 const fs = require('fs')
 const path = require('path')
 const puppeteer = require('puppeteer-extra')
-const RecaptchaPlugin = require('puppeteer-extra-plugin-recaptcha')
 
 const express = require('express');
 const app = express();
@@ -11,15 +10,15 @@ const db = require('./database');
 const Accounts = require('./accounts');
 let Constants = require('./Constants');
 
-puppeteer.use(
-    RecaptchaPlugin({
-        provider: {
-            id: '2captcha',
-            token: '1f5625b7bce2ba96e85ef0f29409f302' // REPLACE THIS WITH YOUR OWN 2CAPTCHA API KEY ⚡
-        },
-        visualFeedback: true // colorize reCAPTCHAs (violet = detected, green = solved)
-    })
-)
+// puppeteer.use(
+//     RecaptchaPlugin({
+//         provider: {
+//             id: '2captcha',
+//             token: '1f5625b7bce2ba96e85ef0f29409f302' // REPLACE THIS WITH YOUR OWN 2CAPTCHA API KEY ⚡
+//         },
+//         visualFeedback: true // colorize reCAPTCHAs (violet = detected, green = solved)
+//     })
+// )
 
 app.get('/', function(req, res) {
     res.send('Hello');
@@ -89,19 +88,8 @@ let server = app.listen(8000, function() {
                     await submitBtn.click()
 
                     await page.waitForNavigation({ waitUntil: 'networkidle0', timeout: 0 });
-                    let loop;
-                    do {
-                        const {
-                            captchas,
-                            filtered,
-                            solutions,
-                            solved,
-                            error
-                        } = await page.solveRecaptchas();
-                        loop = error;
-                        if (loop) await page.reload({ waitUntil: ["networkidle0", "domcontentloaded"] });
+                    await page.solveRecaptchas();
 
-                    } while (loop)
                     const proceedBtn = await page.waitForSelector('#ctl00_mainContentPlaceHolder_captchaFNameLNameSubmitButton');
                     await proceedBtn.click();
                     await page.waitForNavigation({ waitUntil: 'networkidle0', timeout: 0 });

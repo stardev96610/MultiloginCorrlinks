@@ -1,16 +1,11 @@
 const mysql = require('mysql')
+const config = require('./config');
 
-const db = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "friend.b617",
-    database: "corrlinks",
-});
-db.connect(function(error) {
+config.db.connect(function(error) {
     if (!!error) {
         console.log(error);
     } else {
         console.log('Connected..!');
     }
 });
-module.exports = db
+module.exports = config.db;
