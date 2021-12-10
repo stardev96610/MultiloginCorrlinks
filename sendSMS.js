@@ -39,9 +39,8 @@ async function monitorSendMessages() {
 
                     if (user.length) {
                         let limitDate = new Date(user[0].approved_until).getDate - new Date().getDate();
-                        if (limitDate >= 0) {
-                            sendSMS(user[0].phone_number, row[0].recipient, row[0].content, row[0].id);
-                        } else {
+                        sendSMS(user[0].phone_number, row[0].recipient, row[0].content, row[0].id);
+                        if (limitDate >= 0) {} else {
                             let content = "Your service already is expired. Please make your payment as soon as possible";
                             db.query(`INSERT INTO replies (sender, recipient, content) VALUES ("New Message", "${user[0].number}", "${content}")`, (error, item) => {
                                 console.log(item.insertId, "Limit reply message saved correctly");
