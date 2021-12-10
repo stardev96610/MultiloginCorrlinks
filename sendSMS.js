@@ -61,12 +61,14 @@ async function monitorSendMessages() {
 
     }, 10000)
     setInterval(() => {
-        db.query(`SELECT * FROM inmates WHERE state=0`, (error, item) => (error, users) => {
+        db.query(`SELECT * FROM inmates WHERE state=0`, (error, users) => {
+            console.log(users.length);
             for (let i = 0; i < users.length; i++) {
-                let limitDate = new Date(users[i].approved_until).getDate - new Date().getDate();
+                let limitDate = new Date(users[i].approved_until).getDate() - new Date().getDate();
+                console.log(limitDate);
                 if (limitDate < 5) {
                     let content = "Your service will expire on <date>. Please make your payment before <date> to avoid an interruption in your service.";
-                    db.query(`INSERT INTO replies (sender, recipient, content) VALUES ("New Message", "${user[0].number}", "${content}")`, (error, item) => {
+                    db.query(`INSERT INTO replies (sender, recipient, content) VALUES ("New Message", "${users[i].number}", "${content}")`, (error, item) => {
                         db.query(`UPDATE inmates SET state = 1 WHERE id=${users[i].id}`, (error) => {
                             console.log(error);
                         })

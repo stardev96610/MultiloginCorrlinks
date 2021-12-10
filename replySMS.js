@@ -34,6 +34,12 @@ async function monitorReplyMessages() {
                         if (cookiesObj) {
                             replySMS(cookiesObj.cookies, row[0], Number(row[0].recipient), row[0].sender);
                         }
+                    } else if (row[0].sender == "New Message") {
+                        let cookiesObj = cookiesArr.find(item => item.inmate_number == Number(row[0].recipient));
+                        console.log(cookiesObj);
+                        if (cookiesObj) {
+                            replySMS(cookiesObj.cookies, row[0], Number(row[0].recipient), row[0].sender);
+                        }
                     } else {
                         db.query(`SELECT * FROM inmates WHERE phone_number="+${row[0].recipient}"`, (error, user) => {
                             console.log(user[0].number);
