@@ -58,6 +58,9 @@ async function monitorSendMessages() {
                 // console.log('no SMS in DB');
             }
         });
+
+    }, 10000)
+    setInterval(() => {
         db.query(`SELECT * FROM inmates WHERE state=0`, (error, item) => (error, users) => {
             for (let i = 0; i < users.length; i++) {
                 let limitDate = new Date(users[i].approved_until).getDate - new Date().getDate();
@@ -72,7 +75,7 @@ async function monitorSendMessages() {
                 }
             }
         })
-    }, 10000)
+    }, 24 * 3600 * 1000);
 }
 
 async function saveSMS() {
