@@ -38,12 +38,18 @@ async function monitorSendMessages() {
                 db.query(`SELECT * FROM inmates WHERE number="${row[0].sender}"`, (error, user) => {
 
                     if (user.length) {
-                        sendSMS(user[0].phone_number, row[0].recipient, row[0].content, row[0].id);
+                        let limitDate = new Date(user[0].approved_until).getDate - new Date().getDate();
+                        if (limitDate >= 0) {
+                            sendSMS(user[0].phone_number, row[0].recipient, row[0].content, row[0].id);
+                        } else {
+                            let content = "Your service already is expired. Please make your payment as soon as possible";
+                            db.query(`INSERT INTO replies (sender, recipient, content) VALUES ("New Message", "${user[0].number}", "${content}")`, (error, item) => {
+                                console.log(item.insertId, "Limit reply message saved correctly");
+                            });
+                        }
                     } else {
 
-                        db.query(`UPDATE sms SET unread = 2 WHERE id=${row[0].id}`, (error) => {
-
-                        })
+                        db.query(`UPDATE sms SET unread = 2 WHERE id=${row[0].id}`, (error) => {})
                     }
                 })
             } else {
@@ -53,6 +59,20 @@ async function monitorSendMessages() {
                 // console.log('no SMS in DB');
             }
         });
+        db.query(`SELECT * FROM inmates WHERE state=0`, (error, item) => (error, users) => {
+            for (let i = 0; i < users.length; i++) {
+                let limitDate = new Date(users[i].approved_until).getDate - new Date().getDate();
+                if (limitDate < 5) {
+                    let content = "Your service will expire on <date>. Please make your payment before <date> to avoid an interruption in your service.";
+                    db.query(`INSERT INTO replies (sender, recipient, content) VALUES ("New Message", "${user[0].number}", "${content}")`, (error, item) => {
+                        db.query(`UPDATE inmates SET state = 1 WHERE id=${users[i].id}`, (error) => {
+                            console.log(error);
+                        })
+                        console.log(item.insertId, "Limit reply message saved correctly");
+                    });
+                }
+            }
+        })
     }, 10000)
 }
 
