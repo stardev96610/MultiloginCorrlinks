@@ -27,7 +27,7 @@ async function monitorReplyMessages() {
             if (row.length) {
                 console.log("sender: ", row[0].sender);
                 console.log("recipient: ", row[0].recipient);
-                db.query(`UPDATE replies SET unread = 2 WHERE id=${row[0].id}`, async(error, item) => {
+                db.query(`UPDATE replies SET unread = 2 WHERE id=${row[0].id}`, (error, item) => {
 
                     if (keywordList.includes(row[0].sender)) {
                         let cookiesObj = cookiesArr.find(item => item.inmate_number == Number(row[0].recipient));
@@ -41,7 +41,7 @@ async function monitorReplyMessages() {
                             replySMS(cookiesObj.cookies, row[0], Number(row[0].recipient), row[0].sender);
                         }
                     } else {
-                        db.query(`SELECT * FROM inmates WHERE phone_number="+${row[0].recipient}"`, (error, user) => {
+                        db.query(`SELECT * FROM inmates WHERE phone_number="+${row[0].recipient}"`, async(error, user) => {
                             let inmateNumber = user[0].number.replace(/[^0-9]/g, '');
                             let contactList = await Keyword.getContactList(inmateNumber);
                             let contactItem = contactList.find(item => item[1] == row[0].recipient);
