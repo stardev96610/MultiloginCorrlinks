@@ -22,7 +22,7 @@ let interval;
 async function monitorReplyMessages() {
     let keywordList = await Keyword.getKeys();
 
-    interval = setInterval(() => {
+    interval = setInterval(async() => {
         db.query(`SELECT * FROM replies WHERE unread=1 LIMIT 1`, async(error, row) => {
             if (row.length) {
                 console.log("sender: ", row[0].sender);
