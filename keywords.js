@@ -6,3 +6,10 @@ exports.getKeys = () => {
         });
     })
 }
+exports.getContactList = (inmateId) => {
+    return new Promise(resolve => {
+        db.query(`SELECT * FROM contacts WHERE inmate_id=${inmateId}`, (error, contactList) => {
+            resolve(contactList.map(item => [item.contact_name.toLowerCase(), item.contact_number]));
+        });
+    })
+}

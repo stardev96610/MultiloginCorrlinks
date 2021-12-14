@@ -21,7 +21,7 @@ process.on('message', msg => {
 let interval;
 async function monitorReplyMessages() {
     let keywordList = await Keyword.getKeys();
-    console.log(keywordList);
+
     interval = setInterval(() => {
         db.query(`SELECT * FROM replies WHERE unread=1 LIMIT 1`, (error, row) => {
             if (row.length) {
@@ -42,11 +42,13 @@ async function monitorReplyMessages() {
                         }
                     } else {
                         db.query(`SELECT * FROM inmates WHERE phone_number="+${row[0].recipient}"`, (error, user) => {
-                            console.log(user[0].number);
                             let inmateNumber = user[0].number.replace(/[^0-9]/g, '');
+                            let contactList = await Keyword.getContactList(inmateNumber);
+                            let contactItem = contactList.find(item => item[1] == row[0].recipient);
+                            let sender = contactItem ? contactItem[0] : row[0].sender;
                             let cookiesObj = cookiesArr.find(item => item.inmate_number == inmateNumber);
                             if (cookiesObj) {
-                                replySMS(cookiesObj.cookies, row[0], Number(inmateNumber), row[0].sender);
+                                replySMS(cookiesObj.cookies, row[0], Number(inmateNumber), sender);
                             }
                         });
                     }

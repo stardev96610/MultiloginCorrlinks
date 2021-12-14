@@ -9,6 +9,7 @@ const app = express();
 const db = require('./database');
 const Accounts = require('./accounts');
 let Constants = require('./Constants');
+const Keyword = require('./keywords');
 
 // puppeteer.use(
 //     RecaptchaPlugin({
@@ -26,8 +27,12 @@ app.get('/', function(req, res) {
 
 app.get('/multiwebhook', function(req, res) {
     let data = req.query.Body.replace(/"/g, '\\"');
+    let contactList = await Keyword.getContactList(req.query.To);
+
     if (req.query.From && req.query.To && req.query.Body) {
-        db.query(`INSERT INTO replies (sender, recipient, content) VALUES ("${req.query.From.slice(1)}", "${req.query.To.slice(1)}", "${data}")`, (error, item) => {
+        let contactItem = contactList.find(item => item[1] == req.query.From);
+        let sender = contactItem ? contactItem[0] : req.query.From.slice(1);
+        db.query(`INSERT INTO replies (sender, recipient, content) VALUES ("${sender}", "${req.query.To.slice(1)}", "${data}")`, (error, item) => {
             console.log(item.insertId, "reply message saved correctly");
             res.send(JSON.stringify(req.query));
         });

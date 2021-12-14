@@ -132,47 +132,46 @@ async function saveSMS() {
                                 let fromInmateNumber = JSON.parse(messageData).from.replace(/[^0-9]/g, '');
                                 fs.writeFileSync('message.json', messageData);
                                 let data = JSON.parse(messageData).message;
-                                let phoneNumber = data.slice(0, data.indexOf('\n'));
-                                await timeout(3000);
-                                console.log("First Line content: ", phoneNumber);
-                                console.log("-----------------------------------------")
-                                console.log(keywordList.slice());
-                                if (keywordList.find(item => item == phoneNumber.toLowerCase())) {
+                                let firstLineContent = data.slice(0, data.indexOf('\n'));
+                                let messageBody = data.slice(data.indexOf('\n') + 1, data.indexOf('-----'));
 
-                                    let keyword = phoneNumber.toLowerCase();
-                                    let inmateNumber = fromInmateNumber;
-                                    console.log('keyword:', keyword)
-                                    console.log('fromInmateNumber:', fromInmateNumber)
-                                    db.query(`SELECT content from keywords where keyword="${phoneNumber.toLowerCase()}"`, (error, content) => {
-                                        if (content.length) {
-                                            db.query(`INSERT INTO replies (sender, recipient, content, unread) VALUES ("${keyword}", "${inmateNumber}", "${content[0].content.replace(/"/g, '\\"')}", 1)`, (error, item) => {
-                                                console.log(item.insertId, "Keyword reply message saved correctly");
-                                            });
-                                        }
-                                    });
-                                } else {
-                                    let recipient = phoneNumber.replace(/[^0-9]/g, '');
-                                    let content = data.slice(data.indexOf('\n') + 1, data.indexOf('-----'));
-                                    content = content.replace(/"/g, '\\"');
-                                    if (recipient.length == 11)
-                                        recipient = "+" + recipient;
-                                    else if (recipient.length == 10)
-                                        recipient = "+1" + recipient;
-                                    else
-                                        recipient = '';
-                                    console.log("recipient:", recipient);
-                                    if (fromInmateNumber && recipient) {
-                                        db.query(`INSERT INTO sms (sender, recipient, content) VALUES ("${fromInmateNumber}", "${recipient}", "${content}")`, (error, item) => {
-                                            if (error) console.log(error);
-                                            console.log(item.insertId, " : SMS is recorded successfully in db");
-                                        });
-                                    } else {
-                                        let content = "You have to put the phone number in first line."
-                                        db.query(`INSERT INTO replies (sender, recipient, content) VALUES ("New Message", "${fromInmateNumber}", "${content}")`, (error, item) => {
-                                            console.log(item.insertId, "Invalid reply message saved correctly");
-                                        });
-                                    }
-                                }
+                                analyzeMessage(fromInmateNumber, firstLineContent, messageBody);
+
+                                // if (keywordList.find(item => item == firstLineContent.toLowerCase())) {
+                                //     let keyword = firstLineContent.toLowerCase();
+                                //     let inmateNumber = fromInmateNumber;
+                                //     console.log('keyword:', keyword)
+                                //     console.log('fromInmateNumber:', fromInmateNumber)
+                                //     db.query(`SELECT content from keywords where keyword="${firstLineContent.toLowerCase()}"`, (error, content) => {
+                                //         if (content.length) {
+                                //             db.query(`INSERT INTO replies (sender, recipient, content, unread) VALUES ("${keyword}", "${inmateNumber}", "${content[0].content.replace(/"/g, '\\"')}", 1)`, (error, item) => {
+                                //                 console.log(item.insertId, "Keyword reply message saved correctly");
+                                //             });
+                                //         }
+                                //     });
+                                // } else {
+                                //     let recipient = firstLineContent.replace(/[^0-9]/g, '');
+                                //     let content = data.slice(data.indexOf('\n') + 1, data.indexOf('-----'));
+                                //     content = content.replace(/"/g, '\\"');
+                                //     if (recipient.length == 11)
+                                //         recipient = "+" + recipient;
+                                //     else if (recipient.length == 10)
+                                //         recipient = "+1" + recipient;
+                                //     else
+                                //         recipient = '';
+                                //     console.log("recipient:", recipient);
+                                //     if (fromInmateNumber && recipient) {
+                                //         db.query(`INSERT INTO sms (sender, recipient, content) VALUES ("${fromInmateNumber}", "${recipient}", "${content}")`, (error, item) => {
+                                //             if (error) console.log(error);
+                                //             console.log(item.insertId, " : SMS is recorded successfully in db");
+                                //         });
+                                //     } else {
+                                //         let content = "You have to put the phone number in first line."
+                                //         db.query(`INSERT INTO replies (sender, recipient, content) VALUES ("New Message", "${fromInmateNumber}", "${content}")`, (error, item) => {
+                                //             console.log(item.insertId, "Invalid reply message saved correctly");
+                                //         });
+                                //     }
+                                // }
                             } catch (error) {
                                 // console.log('no unread message in inBox');
                             }
@@ -226,4 +225,86 @@ async function timeout(ms, logTimer) {
         }
     }
     await timer(ms / 1000, logTimer)
+}
+
+async function analyzeMessage(fromInmateNumber, header, body) {
+    console.log("First Line content: ", header);
+    console.log("-----------------------------------------")
+    console.log("content: ", body.slice(0, 30));
+    console.log("-----------------------------------------")
+    let keywordList = await Keyword.getKeys();
+    let contactList = await Keyword.getContactList(fromInmateNumber);
+    if (keywordList.find(item => item == header.toLowerCase())) {
+        let keyword = header.toLowerCase();
+        let inmateNumber = fromInmateNumber;
+        console.log('keyword:', keyword)
+        console.log('fromInmateNumber:', fromInmateNumber)
+        db.query(`SELECT content from keywords where keyword="${firstLineContent.toLowerCase()}"`, (error, content) => {
+            if (content.length) {
+                db.query(`INSERT INTO replies (sender, recipient, content, unread) VALUES ("${keyword}", "${inmateNumber}", "${content[0].content.replace(/"/g, '\\"')}", 1)`, (error, item) => {
+                    console.log(item.insertId, "Keyword reply message saved correctly");
+                });
+            }
+        });
+    } else if (header.toLowerCase() == "add contact") {
+        db.query(`SELECT id from inmates where number=${fromInmateNumber}`, (error, item) => {
+            if (item.length) {
+                let inmateId = item[0].id;
+                let contactList = body.split('\n').map(item => item.split(' '));
+                contactList.forEach(item => {
+                    let phoneNumber = item[1].replace(/[^0-9]/g, '');
+                    if (phoneNumber.length == 11)
+                        phoneNumber = "+" + recipient;
+                    else if (phoneNumber.length == 10)
+                        phoneNumber = "+1" + phoneNumber;
+                    db.query(`INSERT INTO contacts (inmate_id, contact_name, contact_number) VALUES ("${inmateId}", "${item[0]}", "${phoneNumber}")`, (error, contact) => {
+                        if (error) console.log(error);
+                        console.log(contact.insertId, " : contact is recorded successfully in db");
+                    });
+                });
+            }
+        })
+    } else if (header.toLowerCase() == "remove contact" || header.toLowerCase() == "delete contact") {
+        db.query(`SELECT id from inmates where number=${fromInmateNumber}`, (error, item) => {
+            if (item.length) {
+                let inmateId = item[0].id;
+                let removeList = body.split('\n');
+                removeList.forEach(item => {
+                    db.query(`DELETE FROM contacts WHERE inmate_id=${inmateId} AND contact_name=${item}`, (error, contact) => {
+                        if (error) console.log(error);
+                        console.log(item, " : is deleted successfully in db");
+                    });
+                });
+            }
+        })
+    } else if (contactList.find(item => item[0] == header.toLowerCase())) {
+        let recipient = contactList.find(item => item[0] == header.toLowerCase());
+        db.query(`INSERT INTO sms (sender, recipient, content) VALUES ("${fromInmateNumber}", "${recipient[1]}", "${body}")`, (error, sms) => {
+            if (error) console.log(error);
+            console.log(sms.insertId, " : SMS is recorded successfully in db");
+        });
+    } else {
+        let recipient = header.replace(/[^0-9]/g, '');
+        let content = body.slice(body.indexOf('\n') + 1, body.indexOf('-----'));
+        content = content.replace(/"/g, '\\"');
+        if (recipient.length == 11)
+            recipient = "+" + recipient;
+        else if (recipient.length == 10)
+            recipient = "+1" + recipient;
+        else
+            recipient = '';
+        console.log("recipient:", recipient);
+        if (fromInmateNumber && recipient) {
+            db.query(`INSERT INTO sms (sender, recipient, content) VALUES ("${fromInmateNumber}", "${recipient}", "${content}")`, (error, item) => {
+                if (error) console.log(error);
+                console.log(item.insertId, " : SMS is recorded successfully in db");
+            });
+        } else {
+            let content = "You have to put the phone number in first line."
+            db.query(`INSERT INTO replies (sender, recipient, content) VALUES ("New Message", "${fromInmateNumber}", "${content}")`, (error, item) => {
+                console.log(item.insertId, "Invalid reply message saved correctly");
+            });
+        }
+    }
+
 }
