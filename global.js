@@ -25,7 +25,7 @@ app.get('/', function(req, res) {
     res.send('Hello');
 });
 
-app.get('/multiwebhook', function(req, res) {
+app.get('/multiwebhook', async function(req, res) {
     let data = req.query.Body.replace(/"/g, '\\"');
     let contactList = await Keyword.getContactList(req.query.To);
 
