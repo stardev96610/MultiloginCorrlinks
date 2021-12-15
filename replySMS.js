@@ -42,13 +42,19 @@ async function monitorReplyMessages() {
                         }
                     } else {
                         db.query(`SELECT * FROM inmates WHERE phone_number="+${row[0].recipient}"`, async(error, user) => {
-                            let inmateNumber = user[0].number.replace(/[^0-9]/g, '');
-                            let contactList = await Keyword.getContactList(inmateNumber);
-                            let contactItem = contactList.find(item => item[1] == row[0].recipient);
-                            let sender = contactItem ? contactItem[0] : row[0].sender;
-                            let cookiesObj = cookiesArr.find(item => item.inmate_number == inmateNumber);
-                            if (cookiesObj) {
-                                replySMS(cookiesObj.cookies, row[0], Number(inmateNumber), sender);
+                            if (user.length) {
+                                let inmateNumber = user[0].number.replace(/[^0-9]/g, '');
+                                let contactList = await Keyword.getContactList(inmateNumber);
+                                let contactItem = contactList.find(item => item[1] == row[0].recipient);
+                                let sender = contactItem ? contactItem[0] : row[0].sender;
+                                let cookiesObj = cookiesArr.find(item => item.inmate_number == inmateNumber);
+                                if (cookiesObj) {
+                                    replySMS(cookiesObj.cookies, row[0], Number(inmateNumber), sender);
+                                }
+                            } else {
+                                db.query(`UPDATE replies SET unread = 3 WHERE id=${row[0].id}`, (error, item) => {
+
+                                });
                             }
                         });
                     }
