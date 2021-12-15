@@ -8,8 +8,15 @@ exports.getKeys = () => {
 }
 exports.getContactList = (inmateId) => {
     return new Promise(resolve => {
+        console.log("inmateId:", inmateId)
         db.query(`SELECT * FROM contacts WHERE inmate_id=${inmateId}`, (error, contactList) => {
-            resolve(contactList.map(item => [item.contact_name.toLowerCase(), item.contact_number]));
+            if (error) console.log(error);
+            console.log(contactList);
+            if (contactList.length) {
+                resolve(contactList.map(item => [item.contact_name.toLowerCase(), item.contact_number]));
+            } else {
+                resolve([]);
+            }
         });
     })
 }
