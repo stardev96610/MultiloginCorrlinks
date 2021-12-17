@@ -11,16 +11,6 @@ const Accounts = require('./accounts');
 let Constants = require('./Constants');
 const Keyword = require('./keywords');
 
-// puppeteer.use(
-//     RecaptchaPlugin({
-//         provider: {
-//             id: '2captcha',
-//             token: '1f5625b7bce2ba96e85ef0f29409f302' // REPLACE THIS WITH YOUR OWN 2CAPTCHA API KEY ⚡
-//         },
-//         visualFeedback: true // colorize reCAPTCHAs (violet = detected, green = solved)
-//     })
-// )
-
 app.get('/', function(req, res) {
     res.send('Hello');
 });
@@ -34,7 +24,7 @@ app.get('/multiwebhook', async function(req, res) {
         let sender = contactItem ? contactItem[0] : req.query.From.slice(1);
         db.query(`INSERT INTO replies (sender, recipient, content) VALUES ("${sender}", "${req.query.To.slice(1)}", "${data}")`, (error, item) => {
             console.log(item.insertId, "reply message saved correctly");
-            res.send(JSON.stringify(req.query));
+            // res.send(JSON.stringify(req.query));
         });
     }
 });
@@ -117,9 +107,9 @@ let server = app.listen(8000, function() {
                 try {
                     let cookies = Constants.getCookies().find(item => item.inmate_number == accountList[i].inmate_number).cookies;
                     await page.setCookie(...cookies);
-                    await page.goto('https://www.corrlinks.com/Default.aspx', { timeout: 30000 }); // Open unreadMessageList page
+                    await page.goto('https://www.corrlinks.com/Default.aspx', { timeout: 30000 });
                     cookies = await page.cookies();
-                    Constants.removeCookies(accountList[i].inmate_number)
+                    Constants.removeCookies(accountList[i].inmate_number);
                     let time = new Date();
                     Constants.addCookies({
                         inmate_number: accountList[i].inmate_number,
@@ -127,9 +117,9 @@ let server = app.listen(8000, function() {
                         time
                     });
                     await browser.close();
-                    await timeout(5000);
                 } catch (error) {
-                    console.log(error);
+                    console.log('Cookie Error');
+                    Constants.removeCookies(accountList[i].inmate_number);
                     await browser.close();
                 }
             }

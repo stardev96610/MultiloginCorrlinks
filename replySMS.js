@@ -25,8 +25,6 @@ async function monitorReplyMessages() {
     interval = setInterval(() => {
         db.query(`SELECT * FROM replies WHERE unread=1 LIMIT 1`, (error, row) => {
             if (row.length) {
-                console.log("sender: ", row[0].sender);
-                console.log("recipient: ", row[0].recipient);
                 db.query(`UPDATE replies SET unread = 2 WHERE id=${row[0].id}`, (error, item) => {
 
                     if (keywordList.includes(row[0].sender)) {
@@ -70,6 +68,7 @@ async function monitorReplyMessages() {
 }
 async function replySMS(cookies, row, inmateNumber, senderPhoneNumber) {
     console.log('reply started')
+    console.log("From: ", row.sender);
     console.log("To: ", inmateNumber);
     console.log("content: ", row.content.toString().slice(0, 20) + '...');
     const browser = await puppeteer.launch({
@@ -84,7 +83,6 @@ async function replySMS(cookies, row, inmateNumber, senderPhoneNumber) {
             '--ignore-certificate-errors-spki-list'
         ]
     });
-    // const browser = await puppeteer.launch();
 
     try {
         const page = await browser.newPage();
@@ -103,18 +101,13 @@ async function replySMS(cookies, row, inmateNumber, senderPhoneNumber) {
         const checkBox = await tr.$$('td > div > span > input');
         await checkBox[0].click();
         console.log('checked OK');
-        await page.screenshot({ path: 'check.png' });
 
         const okBtn = await page.waitForSelector('#ctl00_mainContentPlaceHolder_addressBox_okButton');
-
         await okBtn.click();
         console.log('OK button clicked');
-        // await page.waitForNavigation({ waitUntil: 'networkidle0', timeout: 0 });
-        await new Promise((resolve) => {
-            setTimeout(() => {
-                resolve();
-            }, 3000);
-        })
+
+        await timeout(3000);
+
         const subjectTextBox = await page.waitForSelector('#ctl00_mainContentPlaceHolder_subjectTextBox')
         await subjectTextBox.type(row.content.toString().slice(0, 20) + '...');
 
@@ -130,20 +123,15 @@ async function replySMS(cookies, row, inmateNumber, senderPhoneNumber) {
             });
             console.log('the message was replied correctly');
         });
+        try { await browser.close() } catch (error) {}
     } catch (error) {
         await browser.close();
+        console.log('reply error');
         console.log(new Date());
-        console.log(cookies);
         console.log(error);
         clearInterval(interval);
         monitorReplyMessages();
-        // process.send({
-        //     replyError: true
-        // });
     }
-
-    try { await browser.close() } catch (error) {}
-    console.log("the reply Browser is closed");
 }
 
 async function timeout(ms, logTimer) {

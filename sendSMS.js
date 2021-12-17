@@ -7,9 +7,9 @@ const path = require('path')
 const puppeteer = require('puppeteer-extra')
 const RecaptchaPlugin = require('puppeteer-extra-plugin-recaptcha')
 const Keyword = require('./keywords');
-// const Constants = require('./Constants');
 const express = require('express');
 const app = express();
+
 client = new RestClient("b2973d44-31f1-4c87-8f77-dbbe49b347af",
     "PTfb041e2b957431da84be8c062d1b1d72a319f134c906cc62", {
         signalwireSpaceUrl: 'ojochat.signalwire.com',
@@ -30,8 +30,10 @@ async function monitorSendMessages() {
     setInterval(() => {
         db.query(`SELECT * FROM sms WHERE unread=1 LIMIT 1`, (error, row) => {
             if (row.length) {
+                console.log("SMS Start");
                 console.log("from: ", row[0].sender);
                 console.log("to: ", row[0].recipient);
+                console.log("content: ", row[0].content.slice(0, 20));
                 let phoneNumber = row[0].recipient.replace(/[^0-9]/g, '');
                 phoneNumber = "+" + phoneNumber;
 
@@ -39,11 +41,11 @@ async function monitorSendMessages() {
 
                     if (user.length) {
                         let limitDate = new Date(user[0].approved_until).getDate - new Date().getDate();
+                        console.log('--------------');
+                        console.log('until: ', new Date(user[0].approved_until));
+                        console.log("limitDate: ", limitDate);
+                        console.log('--------------');
                         sendSMS(user[0].phone_number, row[0].recipient, row[0].content, row[0].id);
-                        console.log('--------------');
-                        console.log(new Date(user[0].approved_until));
-                        console.log(limitDate);
-                        console.log('--------------');
                         if (limitDate >= 0) {
                             // sendSMS(user[0].phone_number, row[0].recipient, row[0].content, row[0].id);
                         } else {
@@ -68,7 +70,8 @@ async function monitorSendMessages() {
     }, 10000)
     setInterval(() => {
         db.query(`SELECT * FROM inmates WHERE state=0`, (error, users) => {
-            console.log(users.length);
+            if (users.length)
+                console.log('There is expired User');
             for (let i = 0; i < users.length; i++) {
                 let approvedDate = users[i].approved_until ? new Date(users[i].approved_until).toLocaleDateString() : new Date().toLocaleDateString();
                 let limitDate = new Date(users[i].approved_until).getDate() - new Date().getDate();
@@ -77,7 +80,7 @@ async function monitorSendMessages() {
                     let content = `Your service will expire on ${approvedDate}. Please make your payment before ${approvedDate} to avoid an interruption in your service.`;
                     db.query(`INSERT INTO replies (sender, recipient, content) VALUES ("New Message", "${users[i].number}", "${content}")`, (error, item) => {
                         db.query(`UPDATE inmates SET state = 1 WHERE id=${users[i].id}`, (error) => {
-                            console.log(error);
+                            if (error) console.log(error);
                         })
                         console.log(item.insertId, "Limit reply message saved correctly");
                     });
@@ -97,7 +100,6 @@ async function saveSMS() {
                 await Promise.all(
                     cookiesArr.filter((item, index) => index >= min && index < max).map(async item => {
                         return new Promise(async resolve => {
-                            let keywordList = await Keyword.getKeys();
 
                             const browser = await puppeteer.launch({
                                 headless: true,
@@ -141,41 +143,6 @@ async function saveSMS() {
 
                                 analyzeMessage(fromInmateNumber, firstLineContent, messageBody);
 
-                                // if (keywordList.find(item => item == firstLineContent.toLowerCase())) {
-                                //     let keyword = firstLineContent.toLowerCase();
-                                //     let inmateNumber = fromInmateNumber;
-                                //     console.log('keyword:', keyword)
-                                //     console.log('fromInmateNumber:', fromInmateNumber)
-                                //     db.query(`SELECT content from keywords where keyword="${firstLineContent.toLowerCase()}"`, (error, content) => {
-                                //         if (content.length) {
-                                //             db.query(`INSERT INTO replies (sender, recipient, content, unread) VALUES ("${keyword}", "${inmateNumber}", "${content[0].content.replace(/"/g, '\\"')}", 1)`, (error, item) => {
-                                //                 console.log(item.insertId, "Keyword reply message saved correctly");
-                                //             });
-                                //         }
-                                //     });
-                                // } else {
-                                //     let recipient = firstLineContent.replace(/[^0-9]/g, '');
-                                //     let content = data.slice(data.indexOf('\n') + 1, data.indexOf('-----'));
-                                //     content = content.replace(/"/g, '\\"');
-                                //     if (recipient.length == 11)
-                                //         recipient = "+" + recipient;
-                                //     else if (recipient.length == 10)
-                                //         recipient = "+1" + recipient;
-                                //     else
-                                //         recipient = '';
-                                //     console.log("recipient:", recipient);
-                                //     if (fromInmateNumber && recipient) {
-                                //         db.query(`INSERT INTO sms (sender, recipient, content) VALUES ("${fromInmateNumber}", "${recipient}", "${content}")`, (error, item) => {
-                                //             if (error) console.log(error);
-                                //             console.log(item.insertId, " : SMS is recorded successfully in db");
-                                //         });
-                                //     } else {
-                                //         let content = "You have to put the phone number in first line."
-                                //         db.query(`INSERT INTO replies (sender, recipient, content) VALUES ("New Message", "${fromInmateNumber}", "${content}")`, (error, item) => {
-                                //             console.log(item.insertId, "Invalid reply message saved correctly");
-                                //         });
-                                //     }
-                                // }
                             } catch (error) {
                                 // console.log('no unread message in inBox');
                             }
@@ -192,9 +159,6 @@ async function saveSMS() {
                 await timeout(5000)
             }
         } while (true);
-
-
-
     } catch (error) {
         console.log(error)
     }
