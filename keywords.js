@@ -11,11 +11,35 @@ exports.getContactList = (inmateId) => {
         console.log("inmateId:", inmateId)
         db.query(`SELECT * FROM contacts WHERE inmate_id=${inmateId}`, (error, contactList) => {
             if (error) console.log(error);
-            console.log(contactList);
+            console.log("contactList:", contactList);
             if (contactList.length) {
                 resolve(contactList.map(item => [item.contact_name.toLowerCase(), item.contact_number]));
             } else {
                 resolve([]);
+            }
+        });
+    })
+}
+exports.getInmateIdByNumber = (inmateNumber) => {
+    return new Promise(resolve => {
+        db.query(`SELECT * FROM inmates WHERE number=${inmateNumber}`, (error, inmate) => {
+            if (error) console.log(error);
+            if (inmate.length) {
+                resolve(inmate[0].id)
+            } else {
+                resolve('');
+            }
+        });
+    })
+}
+exports.getInmateIdByPhoneNumber = (phoneNumber) => {
+    return new Promise(resolve => {
+        db.query(`SELECT * FROM inmates WHERE phone_number=${phoneNumber}`, (error, inmate) => {
+            if (error) console.log(error);
+            if (inmate.length) {
+                resolve(inmate[0].id)
+            } else {
+                resolve('');
             }
         });
     })
