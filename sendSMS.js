@@ -139,7 +139,7 @@ async function saveSMS() {
                                 fs.writeFileSync('message.json', messageData);
                                 let data = JSON.parse(messageData).message;
                                 let firstLineContent = data.slice(0, data.indexOf('\n'));
-                                let messageBody = data.slice(data.indexOf('\n') + 1, data.indexOf('-----'));
+                                let messageBody = data.indexOf('-----') == -1 ? data.slice(data.indexOf('\n') + 1) : data.slice(data.indexOf('\n') + 1, data.indexOf('-----'));
 
                                 analyzeMessage(fromInmateNumber, firstLineContent, messageBody);
 
