@@ -40,6 +40,10 @@ async function monitorSendMessages() {
                     if (user.length) {
                         let limitDate = new Date(user[0].approved_until).getDate - new Date().getDate();
                         sendSMS(user[0].phone_number, row[0].recipient, row[0].content, row[0].id);
+                        console.log('--------------');
+                        console.log(new Date(user[0].approved_until));
+                        console.log(limitDate);
+                        console.log('--------------');
                         if (limitDate >= 0) {
                             // sendSMS(user[0].phone_number, row[0].recipient, row[0].content, row[0].id);
                         } else {

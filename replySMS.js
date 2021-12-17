@@ -36,7 +36,6 @@ async function monitorReplyMessages() {
                         }
                     } else if (row[0].sender == "New Message") {
                         let cookiesObj = cookiesArr.find(item => item.inmate_number == Number(row[0].recipient));
-                        console.log(cookiesObj);
                         if (cookiesObj) {
                             replySMS(cookiesObj.cookies, row[0], Number(row[0].recipient), row[0].sender);
                         }
@@ -73,7 +72,6 @@ async function replySMS(cookies, row, inmateNumber, senderPhoneNumber) {
     console.log('reply started')
     console.log("To: ", inmateNumber);
     console.log("content: ", row.content.toString().slice(0, 20) + '...');
-    // console.log("Cookies: \n", cookies);
     const browser = await puppeteer.launch({
         headless: true,
         devtools: false,
