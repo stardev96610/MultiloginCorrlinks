@@ -38,6 +38,7 @@ async function monitorReplyMessages() {
                             replySMS(cookiesObj.cookies, row[0], Number(row[0].recipient), row[0].sender);
                         }
                     } else {
+                        console.log(row[0].recipient);
                         db.query(`SELECT * FROM inmates WHERE phone_number="+${row[0].recipient}"`, async(error, user) => {
                             if (user.length) {
                                 let inmateNumber = user[0].number.replace(/[^0-9]/g, '');

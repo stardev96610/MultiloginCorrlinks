@@ -11,7 +11,6 @@ exports.getContactList = (inmateId) => {
         console.log("inmateId:", inmateId)
         db.query(`SELECT * FROM contacts WHERE inmate_id=${inmateId}`, (error, contactList) => {
             if (error) console.log(error);
-            console.log("contactList:", contactList);
             if (contactList.length) {
                 resolve(contactList.map(item => [item.contact_name.toLowerCase(), item.contact_number]));
             } else {
