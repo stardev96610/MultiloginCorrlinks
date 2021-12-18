@@ -1,37 +1,37 @@
-const db = require('./database')
-exports.getKeys = () => {
-    return new Promise(resolve => {
-        db.query(`SELECT keyword FROM keywords`, (error, keywords) => {
-            resolve(keywords.map(item => item.keyword.toLowerCase()));
-        });
-    })
-}
-exports.getContactList = (inmateId) => {
-    return new Promise(resolve => {
-        console.log("inmateId:", inmateId)
-        db.query(`SELECT * FROM contacts WHERE inmate_id=${inmateId}`, (error, contactList) => {
-            if (error) console.log(error);
-            console.log("contactList:", contactList);
-            if (contactList.length) {
-                resolve(contactList.map(item => [item.contact_name.toLowerCase(), item.contact_number]));
-            } else {
-                resolve([]);
-            }
-        });
-    })
-}
-exports.getInmateIdByNumber = (inmateNumber) => {
-    return new Promise(resolve => {
-        db.query(`SELECT * FROM inmates WHERE number=${inmateNumber}`, (error, inmate) => {
-            if (error) console.log(error);
-            if (inmate.length) {
-                resolve(inmate[0].id)
-            } else {
-                resolve('');
-            }
-        });
-    })
-}                       }
+const { fork } = require('child_process');
+const { RestClient } = require('@signalwire/node');
+const db = require('./database');
+const fs = require('fs');
+const path = require('path');
+const puppeteer = require('puppeteer-extra');
+const RecaptchaPlugin = require('puppeteer-extra-plugin-recaptcha');
+const Keyword = require('./keywords');
+let cookiesArr = [];
+
+// const $ = require('cheerio');
+
+
+process.on('message', msg => {
+    if (msg.start) {
+        monitorReplyMessages();
+    }
+    if (msg.cookiesList)
+        cookiesArr = msg.cookiesList;
+});
+let interval;
+async function monitorReplyMessages() {
+    let keywordList = await Keyword.getKeys();
+
+    interval = setInterval(() => {
+        db.query(`SELECT * FROM replies WHERE unread=1 LIMIT 1`, (error, row) => {
+            if (row.length) {
+                db.query(`UPDATE replies SET unread = 2 WHERE id=${row[0].id}`, (error, item) => {
+
+                    if (keywordList.includes(row[0].sender)) {
+                        let cookiesObj = cookiesArr.find(item => item.inmate_number == Number(row[0].recipient));
+                        if (cookiesObj) {
+                            replySMS(cookiesObj.cookies, row[0], Number(row[0].recipient), row[0].sender);
+                        }
                     } else if (row[0].sender == "New Message") {
                         let cookiesObj = cookiesArr.find(item => item.inmate_number == Number(row[0].recipient));
                         if (cookiesObj) {
