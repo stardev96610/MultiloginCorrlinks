@@ -40,7 +40,7 @@ async function monitorSendMessages() {
                 db.query(`SELECT * FROM inmates WHERE number="${row[0].sender}"`, (error, user) => {
 
                     if (user.length) {
-                        let limitDate = new Date(user[0].approved_until).getDate() - new Date().getDate();
+                        let limitDate = new Date(user[0].approved_until) - new Date();
                         console.log('--------------');
                         console.log('until: ', new Date(user[0].approved_until));
                         console.log("limitDate: ", limitDate);
@@ -50,8 +50,9 @@ async function monitorSendMessages() {
                             // sendSMS(user[0].phone_number, row[0].recipient, row[0].content, row[0].id);
                         } else {
                             let content = "Your service already is expired. Please make your payment as soon as possible";
-                            console.log(item.insertId, "Limit reply message saved correctly");
+                            console.log("Limit reply message saved correctly");
                             // db.query(`INSERT INTO replies (sender, recipient, content) VALUES ("New Message", "${user[0].number}", "${content}")`, (error, item) => {
+                            // console.log(item.insertId, "Limit reply message saved correctly");
                             // });
                         }
                     } else {
@@ -74,9 +75,9 @@ async function monitorSendMessages() {
                 console.log('There is expired User');
             for (let i = 0; i < users.length; i++) {
                 let approvedDate = users[i].approved_until ? new Date(users[i].approved_until).toLocaleDateString() : new Date().toLocaleDateString();
-                let limitDate = new Date(users[i].approved_until).getDate() - new Date().getDate();
+                let limitDate = new Date(users[i].approved_until) - new Date();
                 console.log(limitDate);
-                if (limitDate < 5) {
+                if (limitDate < 18000000) {
                     let content = `Your service will expire on ${approvedDate}. Please make your payment before ${approvedDate} to avoid an interruption in your service.`;
                     db.query(`INSERT INTO replies (sender, recipient, content) VALUES ("New Message", "${users[i].number}", "${content}")`, (error, item) => {
                         db.query(`UPDATE inmates SET state = 1 WHERE id=${users[i].id}`, (error) => {
