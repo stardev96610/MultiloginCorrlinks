@@ -1,37 +1,37 @@
+const { fork } = require('child_process')
+
+const { RestClient } = require('@signalwire/node');
 const db = require('./database')
-exports.getKeys = () => {
-    return new Promise(resolve => {
-        db.query(`SELECT keyword FROM keywords`, (error, keywords) => {
-            resolve(keywords.map(item => item.keyword.toLowerCase()));
-        });
-    })
-}
-exports.getContactList = (inmateId) => {
-    return new Promise(resolve => {
-        console.log("inmateId:", inmateId)
-        db.query(`SELECT * FROM contacts WHERE inmate_id=${inmateId}`, (error, contactList) => {
-            if (error) console.log(error);
-            console.log("contactList:", contactList);
-            if (contactList.length) {
-                resolve(contactList.map(item => [item.contact_name.toLowerCase(), item.contact_number]));
-            } else {
-                resolve([]);
-            }
-        });
-    })
-}
-exports.getInmateIdByNumber = (inmateNumber) => {
-    return new Promise(resolve => {
-        db.query(`SELECT * FROM inmates WHERE number=${inmateNumber}`, (error, inmate) => {
-            if (error) console.log(error);
-            if (inmate.length) {
-                resolve(inmate[0].id)
-            } else {
-                resolve('');
-            }
-        });
-    })
-}               console.log("from: ", row[0].sender);
+const fs = require('fs')
+const path = require('path')
+const puppeteer = require('puppeteer-extra')
+const RecaptchaPlugin = require('puppeteer-extra-plugin-recaptcha')
+const Keyword = require('./keywords');
+const express = require('express');
+const app = express();
+
+client = new RestClient("b2973d44-31f1-4c87-8f77-dbbe49b347af",
+    "PTfb041e2b957431da84be8c062d1b1d72a319f134c906cc62", {
+        signalwireSpaceUrl: 'ojochat.signalwire.com',
+    });
+let cookiesArr = [];
+process.on('message', msg => {
+    if (msg.monitor) {
+        monitorSendMessages();
+    }
+    if (msg.start) {
+        saveSMS();
+    }
+    if (msg.cookiesList)
+        cookiesArr = msg.cookiesList;
+});
+
+async function monitorSendMessages() {
+    setInterval(() => {
+        db.query(`SELECT * FROM sms WHERE unread=1 LIMIT 1`, (error, row) => {
+            if (row.length) {
+                console.log("SMS Start");
+                console.log("from: ", row[0].sender);
                 console.log("to: ", row[0].recipient);
                 console.log("content: ", row[0].content.slice(0, 20));
                 let phoneNumber = row[0].recipient.replace(/[^0-9]/g, '');
@@ -201,8 +201,7 @@ async function analyzeMessage(fromInmateNumber, header, body) {
     console.log("content: ", body.slice(0, 30));
     console.log("-----------------------------------------")
     let keywordList = await Keyword.getKeys();
-    let inmateId = await Keyword.getInmateIdByNumber(fromInmateNumber);
-    let contactList = await Keyword.getContactList(inmateId);
+    let contactList = await Keyword.getContactList(fromInmateNumber);
     if (keywordList.find(item => item == header.toLowerCase())) {
         let keyword = header.toLowerCase();
         let inmateNumber = fromInmateNumber;
