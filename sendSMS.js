@@ -40,7 +40,7 @@ async function monitorSendMessages() {
                 db.query(`SELECT * FROM inmates WHERE number="${row[0].sender}"`, (error, user) => {
 
                     if (user.length) {
-                        let limitDate = new Date(user[0].approved_until).getDate - new Date().getDate();
+                        let limitDate = new Date(user[0].approved_until).getDate() - new Date().getDate();
                         console.log('--------------');
                         console.log('until: ', new Date(user[0].approved_until));
                         console.log("limitDate: ", limitDate);
