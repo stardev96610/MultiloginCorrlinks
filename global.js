@@ -17,7 +17,8 @@ app.get('/', function(req, res) {
 
 app.get('/multiwebhook', async function(req, res) {
     let data = req.query.Body.replace(/"/g, '\\"');
-    let contactList = await Keyword.getContactList(req.query.To);
+    let inmateId = await Keyword.getInmateIdByPhoneNumber(req.query.To);
+    let contactList = await Keyword.getContactList(inmateId);
 
     if (req.query.From && req.query.To && req.query.Body) {
         let contactItem = contactList.find(item => item[1] == req.query.From);
