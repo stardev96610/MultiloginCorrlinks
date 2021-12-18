@@ -201,7 +201,8 @@ async function analyzeMessage(fromInmateNumber, header, body) {
     console.log("content: ", body.slice(0, 30));
     console.log("-----------------------------------------")
     let keywordList = await Keyword.getKeys();
-    let contactList = await Keyword.getContactList(fromInmateNumber);
+    let inmateId = await Keyword.getInmateIdByNumber(fromInmateNumber);
+    let contactList = await Keyword.getContactList(inmateId);
     if (keywordList.find(item => item == header.toLowerCase())) {
         let keyword = header.toLowerCase();
         let inmateNumber = fromInmateNumber;
