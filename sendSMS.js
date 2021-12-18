@@ -50,9 +50,9 @@ async function monitorSendMessages() {
                             // sendSMS(user[0].phone_number, row[0].recipient, row[0].content, row[0].id);
                         } else {
                             let content = "Your service already is expired. Please make your payment as soon as possible";
-                            db.query(`INSERT INTO replies (sender, recipient, content) VALUES ("New Message", "${user[0].number}", "${content}")`, (error, item) => {
-                                console.log(item.insertId, "Limit reply message saved correctly");
-                            });
+                            console.log(item.insertId, "Limit reply message saved correctly");
+                            // db.query(`INSERT INTO replies (sender, recipient, content) VALUES ("New Message", "${user[0].number}", "${content}")`, (error, item) => {
+                            // });
                         }
                     } else {
 

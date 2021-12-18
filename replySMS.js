@@ -27,7 +27,6 @@ async function monitorReplyMessages() {
             if (row.length) {
                 console.log(row[0].recipient);
                 db.query(`UPDATE replies SET unread = 2 WHERE id=${row[0].id}`, (error, item) => {
-
                     if (keywordList.includes(row[0].sender)) {
                         let cookiesObj = cookiesArr.find(item => item.inmate_number == Number(row[0].recipient));
                         if (cookiesObj) {
@@ -40,7 +39,6 @@ async function monitorReplyMessages() {
                         }
                     } else {
                         db.query(`SELECT * FROM inmates WHERE phone_number="+${row[0].recipient}"`, async(error, user) => {
-                            console.log(user);
                             if (user.length) {
                                 let inmateNumber = user[0].number.replace(/[^0-9]/g, '');
                                 let inmateId = await Keyword.getInmateIdByNumber(inmateNumber);
@@ -53,7 +51,7 @@ async function monitorReplyMessages() {
                                 }
                             } else {
                                 db.query(`UPDATE replies SET unread = 3 WHERE id=${row[0].id}`, (error, item) => {
-
+                                    console.log('No this inmate', row[0].recipient)
                                 });
                             }
                         });
