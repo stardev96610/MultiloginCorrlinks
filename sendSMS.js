@@ -199,7 +199,7 @@ async function timeout(ms, logTimer) {
 async function analyzeMessage(fromInmateNumber, header, body) {
     console.log("First Line content: ", header);
     console.log("-----------------------------------------")
-    console.log("content: ", body.slice(0, 30));
+    console.log("content: ", body);
     console.log("-----------------------------------------")
     let keywordList = await Keyword.getKeys();
     let inmateId = await Keyword.getInmateIdByNumber(fromInmateNumber);
@@ -255,7 +255,7 @@ async function analyzeMessage(fromInmateNumber, header, body) {
         });
     } else {
         let recipient = header.replace(/[^0-9]/g, '');
-        let content = body.slice(body.indexOf('\n') + 1, body.indexOf('-----'));
+        let content = body;
         content = content.replace(/"/g, '\\"');
         if (recipient.length == 11)
             recipient = "+" + recipient;
