@@ -37,6 +37,11 @@ async function monitorReplyMessages() {
                         if (cookiesObj) {
                             replySMS(cookiesObj.cookies, row[0], Number(row[0].recipient), row[0].sender);
                         }
+                    } else if (row[0].sender == "Google") {
+                        let cookiesObj = cookiesArr.find(item => item.inmate_number == Number(row[0].recipient));
+                        if (cookiesObj) {
+                            replySMS(cookiesObj.cookies, row[0], Number(row[0].recipient), row[0].sender);
+                        }
                     } else {
                         db.query(`SELECT * FROM inmates WHERE phone_number="+${row[0].recipient}"`, async(error, user) => {
                             if (user.length) {
@@ -129,7 +134,6 @@ async function replySMS(cookies, row, inmateNumber, senderPhoneNumber) {
         await browser.close();
         console.log('reply error');
         console.log(new Date());
-        console.log(error);
         clearInterval(interval);
         monitorReplyMessages();
     }

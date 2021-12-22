@@ -253,6 +253,21 @@ async function analyzeMessage(fromInmateNumber, header, body) {
             if (error) console.log(error);
             console.log(sms.insertId, " : SMS is recorded successfully in db");
         });
+    } else if (header.toLowerCase() == 'google') {
+        let searchQuery = body;
+        if (searchQuery) {
+            searchGoogle(searchQuery).then((results => {
+                console.log('results: ', results);
+
+                if (results) {
+                    let content = JSON.stringify(results).replace(/"/g, '\\"');
+                    db.query(`INSERT INTO replies (sender, recipient, content) VALUES ("Google", "${fromInmateNumber}", "${content}")`, (error, item) => {
+                        console.log(item.insertId, "Google reply message saved correctly");
+                    });
+                }
+
+            }));
+        }
     } else {
         let recipient = header.replace(/[^0-9]/g, '');
         let content = body;
@@ -275,6 +290,60 @@ async function analyzeMessage(fromInmateNumber, header, body) {
                 console.log(item.insertId, "Invalid reply message saved correctly");
             });
         }
+    }
+}
+async function searchGoogle(searchQuery) {
+    try {
+        const browser = await puppeteer.launch({
+            headless: true,
+            devtools: false,
+            args: [
+                '--disable-gpu',
+                '--disable-dev-shm-usage',
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--ignore-certificate-errors',
+                '--ignore-certificate-errors-spki-list'
+            ]
+        });
+
+        const page = await browser.newPage();
+        await page.goto('https://google.com');
+        await page.type('input[name="q"]', searchQuery);
+        // await page.keyboard.press('Enter');
+        await page.$eval('input[name=btnK]', button => button.click());
+        await page.waitForNavigation({ waitUntil: 'networkidle0', timeout: 0 });
+        await page.waitForSelector('div[id=search]');
+        const searchResults = await page.$$eval('div[class=v7W49e]', parent => {
+            let data = [];
+            // results.forEach(parent => {
+
+            let gCount = parent[0].querySelectorAll('div[class=g]');
+
+            gCount.forEach(result => {
+
+                //Target the title
+                let title = result.querySelector('div[class=tF2Cxc] > div[class=yuRUbf] > a >  h3');
+                title = title ? title.innerText : '';
+                //Target the url
+                let url = result.querySelector('div[class=tF2Cxc] > div[class=yuRUbf] > a');
+                url = url ? url.href : '';
+                //Target the description
+                let desciption = result.querySelector('div[class=tF2Cxc] > div[class=IsZvec] > div > span');
+                desciption = desciption ? desciption.innerText : '';
+                //Add to the return Array
+                if (title && url && desciption)
+                    data.push({ title, desciption, url });
+            });
+
+            // });
+            return data;
+        })
+        fs.writeFileSync('searchResult.json', JSON.stringify(searchResults));
+        await browser.close();
+        return searchResults;
+    } catch (error) {
+        return '';
     }
 
 }
