@@ -332,8 +332,10 @@ async function searchGoogle(searchQuery) {
                 let desciption = result.querySelector('div[class=tF2Cxc] > div[class=IsZvec] > div > span');
                 desciption = desciption ? desciption.innerText : '';
                 //Add to the return Array
+                let str = "\n";
                 if (title && url && desciption)
-                    data.push({ title, desciption, url });
+                    data.push({ title: title + str, desciption: desciption + str, url: url + str });
+                data.push('\n');
             });
 
             // });
