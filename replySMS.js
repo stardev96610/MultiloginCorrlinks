@@ -39,6 +39,7 @@ async function monitorReplyMessages() {
                         }
                     } else if (row[0].sender == "Google") {
                         let cookiesObj = cookiesArr.find(item => item.inmate_number == Number(row[0].recipient));
+
                         if (cookiesObj) {
                             replySMS(cookiesObj.cookies, row[0], Number(row[0].recipient), row[0].sender);
                         }
@@ -118,7 +119,16 @@ async function replySMS(cookies, row, inmateNumber, senderPhoneNumber) {
         await subjectTextBox.type(row.content.toString().slice(0, 20) + '...');
 
         const messageTextBox = await page.waitForSelector('#ctl00_mainContentPlaceHolder_messageTextBox')
-        await messageTextBox.type(`${senderPhoneNumber}\n` + row.content.toString());
+        if (senderPhoneNumber == 'Google') {
+            let data = JSON.parse(row.content);
+            let str = '';
+            data.forEach(({ title, description, url }) => {
+                str += `{\ntitle: ${title},\ndescription: ${description},\nurl: ${url}\n}`
+            })
+            await messageTextBox.type(`${senderPhoneNumber}\n` + str);
+        } else {
+            await messageTextBox.type(`${senderPhoneNumber}\n` + row.content.toString());
+        }
 
         const sendMessageBtn = await page.waitForSelector('#ctl00_mainContentPlaceHolder_sendMessageButton');
         await sendMessageBtn.click();
