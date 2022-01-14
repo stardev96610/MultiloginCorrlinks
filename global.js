@@ -60,7 +60,7 @@ let server = app.listen(8000, function() {
                 cookiesList: Constants.getCookies()
             });
             const browser = await puppeteer.launch({
-                headless: false,
+                headless: true,
                 devtools: false,
                 args: [
                     '--disable-gpu',
