@@ -76,7 +76,7 @@ let server = app.listen(8000, function() {
                 try {
                     console.log(accountList[i].inmate_number, ": No Cookies");
                     const response = await page.goto('https://www.corrlinks.com/Login.aspx', { waitUntil: 'load', timeout: 0 });
-                    const inputEmail = await page.waitForSelector('#ctl00_mainContentPlaceHolder_loginUserNameTextBox', { timeout: 5000 })
+                    const inputEmail = await page.waitForSelector('#ctl00_mainContentPlaceHolder_loginUserNameTextBox', { timeout: 0 })
                     await inputEmail.type(accountList[i].email);
                     const inputPassword = await page.waitForSelector('#ctl00_mainContentPlaceHolder_loginPasswordTextBox')
                     await inputPassword.type(accountList[i].password);
