@@ -72,6 +72,7 @@ let server = app.listen(8000, function() {
                 ]
             });
             const page = await browser.newPage();
+            await page.screenshot({ path: 'new.png' });
             if (!Constants.isCookieExist(accountList[i].inmate_number)) {
                 try {
                     console.log(accountList[i].inmate_number, ": No Cookies");
