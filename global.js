@@ -75,8 +75,8 @@ let server = app.listen(8000, function() {
             if (!Constants.isCookieExist(accountList[i].inmate_number)) {
                 try {
                     console.log(accountList[i].inmate_number, ": No Cookies");
-                    // const response = await page.goto('https://www.corrlinks.com/Login.aspx', { waitUntil: 'load', timeout: 0 });
-                    const response = await page.goto('https://www.google.com', { waitUntil: 'load', timeout: 0 });
+                    const response = await page.goto('https://www.corrlinks.com/Login.aspx', { waitUntil: 'load', timeout: 0 });
+                    // const response = await page.goto('https://www.google.com', { waitUntil: 'load', timeout: 0 });
                     await page.screenshot({ path: 'login.png' });
 
                     const inputEmail = await page.waitForSelector('#ctl00_mainContentPlaceHolder_loginUserNameTextBox', { timeout: 0 })
