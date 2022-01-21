@@ -329,11 +329,11 @@ async function searchGoogle(searchQuery) {
                 let url = result.querySelector('div[class=tF2Cxc] > div[class=yuRUbf] > a');
                 url = url ? url.href : '';
                 //Target the description
-                let desciption = result.querySelector('div[class=tF2Cxc] > div[class=IsZvec] > div > span');
-                desciption = desciption ? desciption.innerText : '';
+                let description = result.querySelector('div[class=tF2Cxc] > div[class=IsZvec] > div > span');
+                description = description ? description.innerText : '';
                 //Add to the return Array
-                if (title && url && desciption)
-                    data.push({ title, desciption, url });
+                if (title && url && description)
+                    data.push({ title, description, url });
             });
 
             // });

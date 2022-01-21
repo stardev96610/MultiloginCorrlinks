@@ -122,8 +122,8 @@ async function replySMS(cookies, row, inmateNumber, senderPhoneNumber) {
         if (senderPhoneNumber == 'Google') {
             let data = JSON.parse(row.content);
             let str = '';
-            data.forEach(({ title, description, url }) => {
-                str += `{\ntitle: ${title},\ndescription: ${description},\nurl: ${url}\n}`
+            data.forEach(({ title, description, url }, index) => {
+                str += `${index+1}: \n{\ntitle: ${title},\ndescription: ${description},\nurl: ${url}\n}`
             })
             await messageTextBox.type(`${senderPhoneNumber}\n` + str);
         } else {
