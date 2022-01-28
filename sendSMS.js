@@ -145,7 +145,7 @@ async function saveSMS() {
                                 analyzeMessage(fromInmateNumber, firstLineContent, messageBody);
 
                             } catch (error) {
-                                // console.log('no unread message in inBox');
+                                console.log(fromInmateNumber, ' :no unread message in inBox');
                             }
                             await browser.close();
                             resolve();
