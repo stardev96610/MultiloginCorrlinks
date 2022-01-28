@@ -88,10 +88,12 @@ let server = app.listen(8000, function() {
 
                     await page.waitForNavigation({ waitUntil: 'networkidle0', timeout: 0 });
                     await page.solveRecaptchas();
+                    await page.screenshot({ path: 'solveCaptcha.png', fullPage: true });
 
                     const proceedBtn = await page.waitForSelector('#ctl00_mainContentPlaceHolder_captchaFNameLNameSubmitButton');
                     await proceedBtn.click();
                     await page.waitForNavigation({ waitUntil: 'networkidle0', timeout: 0 });
+                    await page.screenshot({ path: 'proceedBtn.png', fullPage: true });
 
                     // Get cookies
                     let cookies = await page.cookies();
