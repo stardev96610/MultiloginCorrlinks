@@ -143,6 +143,7 @@ async function replySMS(cookies, row, inmateNumber, senderPhoneNumber) {
     } catch (error) {
         await browser.close();
         console.log('reply error');
+        console.log(error);
         console.log(new Date());
         clearInterval(interval);
         monitorReplyMessages();
